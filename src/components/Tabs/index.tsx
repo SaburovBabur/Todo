@@ -89,10 +89,10 @@ function Tabs({ children }: ITabsProps) {
             {tab.title}
             <div
               className={clsx({
-                'w-1/2 absolute left-1/4 right-0 bottom-0 rounded-t-lg | z-10':
+                'w-1/2 absolute left-1/4 right-0 bottom-0 rounded-t-full | z-10':
                   true,
-                'border-b-4 border-[#2F80ED]': tab.id === activeTab,
-                'border-b-4 group-hover:border-[#2F80ED]/50 duration-200':
+                'border-b-[5px] border-[#2F80ED]/80': tab.id === activeTab,
+                'border-b-[5px] border-transparent group-hover:border-[#2F80ED]/50 duration-200':
                   tab.id !== activeTab,
               })}
             ></div>

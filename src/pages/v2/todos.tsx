@@ -15,7 +15,21 @@ function Todos(props: IProps) {
       <div className='w-2/5'>
         <Tabs>
           <Tab id={1} title={`All`}>
-            <div className='bg-gray-300 w-full h-64'></div>
+            <div className='space-x-5 py-5 flex justify-between items-center'>
+              <input
+                type='text'
+                placeholder='Todo...'
+                name=''
+                id=''
+                className='text-sm | py-3.5 w-4/5 px-3 focus:outline-none outline-none | border border-gray-300 focus:border-[#2F80ED] focus:shadow-sm shadow-[#2F80ED] rounded-xl duration-200'
+              />
+              <button
+                type='submit'
+                className='font-semibold text-sm | bg-[#2F80ED] w-1/5 text-white px-7 py-3.5 rounded-lg active:scale-95 duration-200'
+              >
+                Add
+              </button>
+            </div>
           </Tab>
 
           <Tab id={2} title={`Active`}>
