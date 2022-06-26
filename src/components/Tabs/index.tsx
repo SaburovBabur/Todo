@@ -1,6 +1,6 @@
+import clsx from 'clsx';
 import React, {
   createContext,
-  Dispatch,
   memo,
   useCallback,
   useContext,
@@ -14,29 +14,18 @@ interface IReact {
   children: React.ReactNode;
 }
 
-// tabs = [
-//   {
-//     id: 'rb:3',
-//     title: < onClick={() => setActiveTab(this.id)}></>,
-//     body: < hidden={activeTab !== 'rb:3'}></>,
-//   }
-// ];
-
-interface ITabsProps extends IReact {}
-
 interface Tab {
   id: number;
   title: React.ReactNode;
-  body: React.ReactNode;
 }
 
 interface ITabsContext {
   activeTab: number;
   setActiveTab: (id: number) => void;
 
-  tabCount: number;
-  incrementTabCount: () => void;
-  decremenTabCount: () => void;
+  tabsCount: number;
+  incrementTabsCount: () => void;
+  decremenTabsCount: () => void;
 
   tabs: Tab[];
   setTabs: (tab: Tab) => void;
@@ -44,130 +33,120 @@ interface ITabsContext {
 
 const TabContext = createContext<ITabsContext>({} as ITabsContext);
 
+interface ITabsProps extends IReact {}
 function Tabs({ children }: ITabsProps) {
   const [activeTab, setActiveTab] = useState(1);
-  const [tabCount, setTabCount] = useState(0);
+  const [tabsCount, setTabsCount] = useState(0);
 
   const [tabs, setTabList] = useState<Tab[]>([] as Tab[]);
 
-  const incrementTabCount = useCallback(() => {
-    setTabCount((count) => (count += 1));
+  const incrementTabsCount = useCallback(() => {
+    setTabsCount((count) => (count += 1));
   }, []);
-  const decremenTabCount = useCallback(() => {
-    setTabCount((count) => (count -= 1));
+
+  const decremenTabsCount = useCallback(() => {
+    setTabsCount((count) => (count -= 1));
   }, []);
 
   function arrUnique(arr: Tab[]): Tab[] {
-    var flags: any = {};
-    var uniqueTabs = arr.filter(function (tab: Tab) {
-      if (flags[tab.id]) {
+    let keys: any = {};
+
+    let arrUnique = arr.filter(function (tab: Tab) {
+      if (keys[tab.id]) {
         return false;
       }
-      flags[tab.id] = true;
+      keys[tab.id] = true;
       return true;
     });
 
-    return uniqueTabs;
+    return arrUnique;
   }
 
-  function setTabs(tab: Tab) {
-    const hasTab = tabs.find((t) => t.id == tab.id);
+  console.log(tabs);
 
-    if (!hasTab) {
-      setTabList((tabs) => [...tabs, tab]);
-    }
-  }
-  console.log(activeTab);
+  const setTabs = useCallback((tab: Tab) => {
+    setTabList((tabs) => [...tabs, tab]);
+  }, []);
 
   return (
     <TabContext.Provider
       value={{
         activeTab,
         setActiveTab,
-        tabCount,
-        decremenTabCount,
-        incrementTabCount,
+        tabsCount,
+        decremenTabsCount,
+        incrementTabsCount,
         tabs,
         setTabs,
       }}
     >
-      {arrUnique(tabs).map((tab) => (
-        <div onClick={() => setActiveTab(tab.id)}>{tab.title}</div>
-      ))}
-      <br />
-      {children}
+      <div className='flex justify-around mb-3 | border-b-2 border-gray-300'>
+        {arrUnique(tabs).map((tab) => (
+          <div
+            onClick={() => setActiveTab(tab.id)}
+            className='flex-1 text-center -mb-0.5 py-4 | relative | text-sm text-[#333333] font-[600] | cursor-pointer group'
+          >
+            {tab.title}
+            <div
+              className={clsx({
+                'w-1/2 absolute left-1/4 right-0 bottom-0 rounded-t-lg | z-10':
+                  true,
+                'border-b-4 border-[#2F80ED]': tab.id === activeTab,
+                'border-b-4 group-hover:border-[#2F80ED]/50 duration-200':
+                  tab.id !== activeTab,
+              })}
+            ></div>
+          </div>
+        ))}
+      </div>
+
+      <div className='w-full'>{children}</div>
     </TabContext.Provider>
   );
 }
 
-function TabsConsumer({
-  id,
-  title,
-  children,
-}: {
-  id: number;
-  title: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <TabContext.Consumer>
-      {(state) => <Tab id={id} title={title} children={children} {...state} />}
-    </TabContext.Consumer>
-  );
-}
-
 interface ITabProps extends IReact {
-  title: React.ReactNode;
   id: number;
+  title: React.ReactNode;
   children: React.ReactNode;
-
-  activeTab: number;
-  setActiveTab: (id: number) => void;
-
-  tabCount: number;
-  incrementTabCount: () => void;
-  decremenTabCount: () => void;
-
-  tabs: Tab[];
-  setTabs: (tab: Tab) => void;
 }
 
-const Tab = memo(function ({
-  activeTab,
-  setActiveTab,
-  tabCount,
-  decremenTabCount,
-  incrementTabCount,
-  tabs,
-  setTabs,
-  title,
-  id,
-  children,
-}: ITabProps) {
-  let count = 0;
+const Tab = ({ id, title, children }: ITabProps) => {
+  const {
+    activeTab,
+    setActiveTab,
+    tabsCount,
+    decremenTabsCount,
+    incrementTabsCount,
+    tabs,
+    setTabs,
+  } = useContext(TabContext);
+
   useEffect(() => {
-    incrementTabCount();
+    incrementTabsCount();
 
     setTabs({
       id,
       title,
-      body: <></>,
     });
 
     return () => {
-      decremenTabCount();
+      decremenTabsCount();
     };
   }, []);
 
   return (
     <>
-      <div style={{ display: `${activeTab === id ? '' : 'none'}` }}>
+      <div
+        style={{ display: `${activeTab === id ? '' : 'none'}` }}
+        className='w-full'
+      >
         {children}
       </div>
     </>
   );
-});
+};
 
-Tabs.Tab = memo(TabsConsumer);
+Tabs.Tab = memo(Tab);
 
 export default Tabs;
