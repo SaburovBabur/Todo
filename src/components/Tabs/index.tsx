@@ -62,8 +62,6 @@ function Tabs({ children }: ITabsProps) {
     return arrUnique;
   }
 
-  console.log(tabs);
-
   const setTabs = useCallback((tab: Tab) => {
     setTabList((tabs) => [...tabs, tab]);
   }, []);

@@ -1,6 +1,6 @@
 ```jsx
 <IF>
-  <ELSE if={state === 'LOADING'}>Loading...</ELSE>
+  <ELSE IF={state === 'LOADING'}>Loading...</ELSE>
 
   <ELSE if={state === 'SUCCESS' && Array.isArray(todos)}>...</ELSE>
 
@@ -9,6 +9,19 @@
   <ELSE if={state === 'ERROR'}>Error</ELSE>
 </IF>
 ```
+
+```jsx
+<IF>
+  <SHOW IF={state === 'LOADING'}>Loading...</SHOW>
+
+  <SHOW IF={state === 'SUCCESS' && Array.isArray(todos)}>...</SHOW>
+
+  <SHOW IF={todos.length === 0}>+Create task</SHOW>
+
+  <SHOW IF={state === 'ERROR'}>Error</SHOW>
+</IF>
+```
+
 
 
 1. Tracking loading state to show loading spinners
