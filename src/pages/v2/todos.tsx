@@ -1,15 +1,14 @@
 import React, { useCallback, useEffect, useId, useState } from 'react'
 import Tabs from '../../components/Tabs'
 import useSWR, { Fetcher, Key } from 'swr'
-import clsx from 'clsx'
-import Map from '../../components/Map'
 import SHOW from '../../components/SHOWIF'
 import produce from 'immer'
-import { Empty } from '../../components/Empty'
 import TodoAddForm from '../../block/todos/TodoAddForm'
 import TodoList from '../../block/todos/TodoList'
 import Button from '../../components/Button'
 import SvgTrash from '../../icons/SvgTrash'
+import addTodo from '../../block/todos/utils/addTodo'
+import { toggleTodo } from '../../block/todos/utils/toggleTodo'
 
 interface IProps {
   children?: React.ReactNode
@@ -35,9 +34,52 @@ const fetcher: Fetcher<Todo[], string> = (url: string) =>
 
 function Todos(props: IProps) {
   const uid: Key = 'https://jsonplaceholder.typicode.com/todos?userId=1'
-  const [todoTitle, setTodoTitle] = useState('')
   const { data: todos, error, mutate } = useSWR<Todo[]>(uid, fetcher)
-  const id = useId()
+
+  const addTodoHandler = useCallback(
+    async ({ title }: { title: string }) => {
+      const newTodo = {
+        id: Math.floor(Math.random() * 100),
+        userId: 1,
+        completed: false,
+        title,
+      }
+
+      if (Array.isArray(todos)) {
+        mutate(addTodo(todos, newTodo), {
+          optimisticData: [...todos!, newTodo],
+          rollbackOnError: true,
+          populateCache: true,
+          revalidate: false,
+        })
+      }
+    },
+    [todos]
+  )
+
+  const toggleTodoHandler = useCallback(
+    ({ id }: { id: Todo[`id`] }) => {
+      if (Array.isArray(todos)) {
+        mutate(toggleTodo(todos, { id }), {
+          optimisticData: produce(todos, (draft) => {
+            draft.forEach((todo) => {
+              if (todo.id === id) {
+                todo.completed = !todo.completed
+              }
+
+              return todo
+            })
+
+            return draft
+          }),
+          rollbackOnError: true,
+          populateCache: true,
+          revalidate: false,
+        })
+      }
+    },
+    [todos]
+  )
 
   const removeTodosHandler = useCallback(async () => {
     if (Array.isArray(todos)) {
@@ -49,53 +91,6 @@ function Todos(props: IProps) {
       })
     }
   }, [todos])
-
-  const addTodoHandler = useCallback(
-    async ({ title }: { title: string }) => {
-      setTodoTitle('')
-
-      const newTodo = {
-        id: Math.floor(Math.random() * 100),
-        userId: 1,
-        completed: false,
-        title,
-      }
-
-      console.log(todos)
-
-      mutate(addTodo(newTodo), {
-        optimisticData: [...todos!, newTodo],
-        rollbackOnError: true,
-        populateCache: true,
-        revalidate: false,
-      })
-    },
-    [todos]
-  )
-
-  const addTodo = useCallback(
-    async (newTodo: Todo): Promise<Todo[]> => {
-      const res = await fetch('https://jsonplaceholder.typicode.com/posts', {
-        method: 'POST',
-        body: JSON.stringify(newTodo),
-        headers: {
-          'Content-type': 'application/json; charset=UTF-8',
-        },
-      })
-
-      const data = await res.json()
-
-      if (Array.isArray(todos) && res.ok) {
-        return produce(todos, (draft) => {
-          draft.push(data)
-          return draft
-        })
-      }
-
-      throw new Error('Something went wrong!')
-    },
-    [todos]
-  )
 
   const todoRemoveAll = useCallback(async (): Promise<Todo[]> => {
     const res = await fetch('https://jsonplaceholder.typicode.com/posts/1', {
@@ -115,60 +110,6 @@ function Todos(props: IProps) {
 
     throw new Error('Something went wrong!')
   }, [todos])
-
-  const toggleTodo = useCallback(
-    ({ id }: { id: Todo[`id`] }) => {
-      if (Array.isArray(todos)) {
-        mutate(
-          (async (id) => {
-            const res = await fetch(
-              'https://jsonplaceholder.typicode.com/posts/1',
-              {
-                method: 'PUT',
-                body: JSON.stringify({ completed: true }),
-                headers: {
-                  'Content-type': 'application/json; charset=UTF-8',
-                },
-              }
-            )
-
-            if (res.ok && Array.isArray(todos)) {
-              return produce(todos, (draft) => {
-                draft.forEach((todo) => {
-                  if (todo.id === id) {
-                    todo.completed = !todo.completed
-                  }
-
-                  return todo
-                })
-
-                return draft
-              })
-            }
-
-            throw new Error('Something went wrong!')
-          })(id),
-          {
-            optimisticData: produce(todos, (draft) => {
-              draft.forEach((todo) => {
-                if (todo.id === id) {
-                  todo.completed = !todo.completed
-                }
-
-                return todo
-              })
-
-              return draft
-            }),
-            rollbackOnError: true,
-            populateCache: true,
-            revalidate: false,
-          }
-        )
-      }
-    },
-    [todos]
-  )
 
   const uncompletedTodos = useCallback(() => {
     if (Array.isArray(todos)) {
@@ -196,7 +137,7 @@ function Todos(props: IProps) {
             <TodoAddForm onAdd={(title) => addTodoHandler({ title })} />
 
             <TodoList
-              onToggle={(id) => toggleTodo({ id })}
+              onToggle={(id) => toggleTodoHandler({ id })}
               isLoading={!todos && !error}
               isError={!todos && error}
               data={todos}
@@ -207,7 +148,7 @@ function Todos(props: IProps) {
             <TodoAddForm onAdd={(title) => addTodoHandler({ title })} />
 
             <TodoList
-              onToggle={(id) => toggleTodo({ id })}
+              onToggle={(id) => toggleTodoHandler({ id })}
               isLoading={!todos && !error}
               isError={!todos && error}
               data={uncompletedTodos()}
@@ -218,7 +159,7 @@ function Todos(props: IProps) {
             <TodoAddForm onAdd={(title) => addTodoHandler({ title })} />
 
             <TodoList
-              onToggle={(id) => toggleTodo({ id })}
+              onToggle={(id) => toggleTodoHandler({ id })}
               isLoading={!todos && !error}
               isError={!todos && error}
               data={completedTodos()}
@@ -247,10 +188,3 @@ function Todos(props: IProps) {
 }
 
 export default Todos
-
-// export async function addTodo(todo) {
-//   await delay();
-//   if (Math.random() < 0.5) throw new Error('Failed to add new item!');
-//   todos = [...todos, todo];
-//   return todos;
-// }

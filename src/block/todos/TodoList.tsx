@@ -40,7 +40,7 @@ function TodoList({ isLoading, isError, data, onToggle }: IProps) {
                 type='checkbox'
                 name={`${id}-'todo'-${idx}`}
                 id={`${id}-'todo'-${idx}`}
-                defaultChecked={todo.completed}
+                checked={todo.completed}
                 onChange={() => onToggle(todo.id)}
                 className='h-5 w-5 | rounded-md border-none outline-none'
               />
