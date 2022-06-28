@@ -13,8 +13,6 @@ interface IProps {
 }
 
 function TodoList({ isLoading, isError, data, onToggle }: IProps) {
-  const id = useId()
-
   return (
     <div className='div | pl-2 space-y-5 pb-5'>
       <SHOW IF={isLoading}>Loading..</SHOW>
@@ -32,14 +30,14 @@ function TodoList({ isLoading, isError, data, onToggle }: IProps) {
         <Map datas={data!}>
           {(todo, idx) => (
             <label
-              key={todo.id}
-              htmlFor={`${id}-'todo'-${idx}`}
+              key={`todo-${idx}`}
+              htmlFor={`todo-${idx}`}
               className='flex items-center space-x-3'
             >
               <input
                 type='checkbox'
-                name={`${id}-'todo'-${idx}`}
-                id={`${id}-'todo'-${idx}`}
+                name={`todo-${idx}`}
+                id={`todo-${idx}`}
                 checked={todo.completed}
                 onChange={() => onToggle(todo.id)}
                 className='h-5 w-5 | rounded-md border-none outline-none'

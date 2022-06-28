@@ -39,11 +39,13 @@ function Todos(props: IProps) {
   const addTodoHandler = useCallback(
     async ({ title }: { title: string }) => {
       const newTodo = {
-        id: Math.floor(Math.random() * 100),
+        id: Math.floor(Math.random() * 10000),
         userId: 1,
         completed: false,
         title,
       }
+
+      // console.log(todos, 'todos')
 
       if (Array.isArray(todos)) {
         mutate(addTodo(todos, newTodo), {
@@ -56,6 +58,7 @@ function Todos(props: IProps) {
     },
     [todos]
   )
+  // console.log(todos, 'todos outside')
 
   const toggleTodoHandler = useCallback(
     ({ id }: { id: Todo[`id`] }) => {
@@ -156,8 +159,6 @@ function Todos(props: IProps) {
           </Tab>
 
           <Tab id={3} title={`Completed`}>
-            <TodoAddForm onAdd={(title) => addTodoHandler({ title })} />
-
             <TodoList
               onToggle={(id) => toggleTodoHandler({ id })}
               isLoading={!todos && !error}
