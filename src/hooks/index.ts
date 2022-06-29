@@ -1,6 +1,6 @@
 import React from 'react'
 import useSWR, { Fetcher } from 'swr'
-import { ITodo } from '../components/todos/types/Todo'
+import { ITodo } from '../components/todos/types/ITodo'
 
 const fetcher: Fetcher<ITodo[], string> = (url: string) => {
   return fetch(url).then((res) => {

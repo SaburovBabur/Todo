@@ -1,4 +1,4 @@
-import { ITodo } from '../types/Todo'
+import { ITodo } from '../types/ITodo'
 
 export const addTodo = async (
   todos: ITodo[],

@@ -4,7 +4,7 @@ import { Empty } from '../../components/global/Empty'
 import Map from '../../components/global/Map'
 import SHOW from '../../components/global/SHOWIF'
 import Todo from './Todo'
-import { ITodo } from './types/Todo'
+import { ITodo } from './types/ITodo'
 
 interface IProps {
   isLoading: boolean

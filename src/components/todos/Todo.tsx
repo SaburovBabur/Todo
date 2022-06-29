@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import React from 'react'
-import { ITodo } from './types/Todo'
+import { ITodo } from './types/ITodo'
 
 interface IProps {
   title: React.ReactNode

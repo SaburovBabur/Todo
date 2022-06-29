@@ -1,5 +1,5 @@
 import produce from 'immer'
-import { ITodo } from '../types/Todo'
+import { ITodo } from '../types/ITodo'
 
 export const toggleTodoById = (todos: ITodo[], todoId: ITodo[`id`]) => {
   return produce(todos, (draft) => {

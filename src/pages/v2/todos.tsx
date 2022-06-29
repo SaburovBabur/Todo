@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useId, useState } from 'react'
+import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
 import Tabs from '../../components/global/Tabs'
 import SHOW from '../../components/global/SHOWIF'
 import produce from 'immer'
@@ -10,6 +10,7 @@ import addTodo from '../../components/todos/utils/addTodo'
 import { toggleTodo } from '../../components/todos/utils/toggleTodo'
 import { toggleTodoById } from '../../components/todos/utils/toggleTodoById'
 import { useTodos } from '../../hooks'
+import { ITodo } from '../../components/todos/types/ITodo'
 
 interface IProps {
   children?: React.ReactNode
@@ -17,16 +18,22 @@ interface IProps {
 
 const { Tab } = Tabs
 
-interface Todo {
-  id: number
-  userId: number
-  title: string
-  completed: boolean
-}
-
 function Todos(props: IProps) {
+  // ========================
+  // STATE
+  // ========================
   const { todos, error, mutate } = useTodos()
+  const [completedTodos, uncompletedTodos] = useMemo(
+    () => [
+      todos?.filter((todo) => todo.completed),
+      todos?.filter((todo) => !todo.completed),
+    ],
+    [todos]
+  )
 
+  // ========================
+  // HANDLERS
+  // ========================
   const addTodoHandler = useCallback(
     async ({ title }: { title: string }) => {
       const newTodo = {
@@ -49,7 +56,7 @@ function Todos(props: IProps) {
   )
 
   const toggleTodoHandler = useCallback(
-    ({ id }: { id: Todo[`id`] }) => {
+    ({ id }: { id: ITodo[`id`] }) => {
       if (Array.isArray(todos)) {
         mutate(toggleTodo(todos, { id }), {
           optimisticData: toggleTodoById(todos, id), // Getas all todos and toggles completed to !completed
@@ -73,15 +80,13 @@ function Todos(props: IProps) {
     }
   }, [todos])
 
-  const todoRemoveAll = useCallback(async (): Promise<Todo[]> => {
+  const todoRemoveAll = useCallback(async (): Promise<ITodo[]> => {
     const res = await fetch('https://jsonplaceholder.typicode.com/posts/1', {
       method: 'DELETE',
       headers: {
         'Content-type': 'application/json; charset=UTF-8',
       },
     })
-
-    const data = await res.json()
 
     if (res.ok && Array.isArray(todos)) {
       return produce(todos, (draft) => {
@@ -92,22 +97,6 @@ function Todos(props: IProps) {
     throw new Error('Something went wrong!')
   }, [todos])
 
-  const uncompletedTodos = useCallback(() => {
-    if (Array.isArray(todos)) {
-      return todos.filter((todo) => !todo.completed)
-    }
-
-    return todos
-  }, [todos])
-
-  const completedTodos = useCallback(() => {
-    if (Array.isArray(todos)) {
-      return todos.filter((todo) => todo.completed)
-    }
-
-    return todos
-  }, [todos])
-
   return (
     <section className='flex flex-col items-center h-screen'>
       <h1 className='font-bold text-3xl py-10'>#Todo</h1>
@@ -115,6 +104,7 @@ function Todos(props: IProps) {
       <div className='w-2/5'>
         <Tabs>
           <Tab id={1} title={`All`}>
+            {/* <Todos.All /> */}
             <TodoAddForm onAdd={(title) => addTodoHandler({ title })} />
 
             <TodoList
@@ -132,22 +122,22 @@ function Todos(props: IProps) {
               onToggle={(id) => toggleTodoHandler({ id })}
               isLoading={!todos && !error}
               isError={!todos && error}
-              data={uncompletedTodos()}
+              data={uncompletedTodos}
             />
           </Tab>
 
           <Tab id={3} title={`Completed`}>
+            {/* <Todos.Completed /> */}
+
             <TodoList
               onToggle={(id) => toggleTodoHandler({ id })}
               isLoading={!todos && !error}
               isError={!todos && error}
-              data={completedTodos()}
+              data={completedTodos}
             />
 
             <SHOW
-              IF={
-                Array.isArray(completedTodos()) && completedTodos()!.length > 0
-              }
+              IF={Array.isArray(completedTodos) && completedTodos!.length > 0}
             >
               <Button
                 onClick={removeTodosHandler}
