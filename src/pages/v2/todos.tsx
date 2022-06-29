@@ -1,14 +1,15 @@
 import React, { useCallback, useEffect, useId, useState } from 'react'
-import Tabs from '../../components/Tabs'
-import useSWR, { Fetcher, Key } from 'swr'
-import SHOW from '../../components/SHOWIF'
+import Tabs from '../../components/global/Tabs'
+import SHOW from '../../components/global/SHOWIF'
 import produce from 'immer'
-import TodoAddForm from '../../block/todos/TodoAddForm'
-import TodoList from '../../block/todos/TodoList'
-import Button from '../../components/Button'
+import TodoAddForm from '../../components/todos/TodoAddForm'
+import TodoList from '../../components/todos/TodoList'
+import Button from '../../components/global/Button'
 import SvgTrash from '../../icons/SvgTrash'
-import addTodo from '../../block/todos/utils/addTodo'
-import { toggleTodo } from '../../block/todos/utils/toggleTodo'
+import addTodo from '../../components/todos/utils/addTodo'
+import { toggleTodo } from '../../components/todos/utils/toggleTodo'
+import { toggleTodoById } from '../../components/todos/utils/toggleTodoById'
+import { useTodos } from '../../hooks'
 
 interface IProps {
   children?: React.ReactNode
@@ -23,18 +24,8 @@ interface Todo {
   completed: boolean
 }
 
-const fetcher: Fetcher<Todo[], string> = (url: string) =>
-  fetch(url).then((res) => {
-    if (res.ok) {
-      return res.json()
-    }
-
-    throw new Error('Error occured! Try back later!')
-  })
-
 function Todos(props: IProps) {
-  const uid: Key = 'https://jsonplaceholder.typicode.com/todos?userId=1'
-  const { data: todos, error, mutate } = useSWR<Todo[]>(uid, fetcher)
+  const { todos, error, mutate } = useTodos()
 
   const addTodoHandler = useCallback(
     async ({ title }: { title: string }) => {
@@ -44,8 +35,6 @@ function Todos(props: IProps) {
         completed: false,
         title,
       }
-
-      // console.log(todos, 'todos')
 
       if (Array.isArray(todos)) {
         mutate(addTodo(todos, newTodo), {
@@ -58,23 +47,12 @@ function Todos(props: IProps) {
     },
     [todos]
   )
-  // console.log(todos, 'todos outside')
 
   const toggleTodoHandler = useCallback(
     ({ id }: { id: Todo[`id`] }) => {
       if (Array.isArray(todos)) {
         mutate(toggleTodo(todos, { id }), {
-          optimisticData: produce(todos, (draft) => {
-            draft.forEach((todo) => {
-              if (todo.id === id) {
-                todo.completed = !todo.completed
-              }
-
-              return todo
-            })
-
-            return draft
-          }),
+          optimisticData: toggleTodoById(todos, id), // Getas all todos and toggles completed to !completed
           rollbackOnError: true,
           populateCache: true,
           revalidate: false,

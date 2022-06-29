@@ -1,6 +1,9 @@
-import { Todo } from '../types/Todo'
+import { ITodo } from '../types/Todo'
 
-export const addTodo = async (todos: Todo[], todo: Todo): Promise<Todo[]> => {
+export const addTodo = async (
+  todos: ITodo[],
+  todo: ITodo
+): Promise<ITodo[]> => {
   const res = await fetch('https://jsonplaceholder.typicode.com/todos', {
     method: 'POST',
     body: JSON.stringify(todo),

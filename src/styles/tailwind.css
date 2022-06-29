@@ -7,3 +7,22 @@
 html { 
   font-family: 'Montserrat', sans-serif;
 }
+
+
+
+.item-enter {
+  opacity: 0;
+  transition: opacity 700ms ease-out;
+}
+.item-enter-active {
+  opacity: 0;
+  transition: opacity 700ms ease-out;
+}
+.item-exit {
+  opacity: 0;
+  transition: opacity 700ms ease-out;
+}
+.item-exit-active {
+  opacity: 0;
+  transition: opacity 700ms ease-out;
+}
