@@ -4,25 +4,23 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
 
-html { 
-  font-family: 'Montserrat', sans-serif;
+html {
+    font-family: 'Montserrat', sans-serif;
 }
-
-
 
 .item-enter {
-  opacity: 0;
-  transition: opacity 700ms ease-out;
+    opacity: 0;
+    transition: opacity 700ms ease-out;
 }
 .item-enter-active {
-  opacity: 0;
-  transition: opacity 700ms ease-out;
+    opacity: 0;
+    transition: opacity 700ms ease-out;
 }
 .item-exit {
-  opacity: 0;
-  transition: opacity 700ms ease-out;
+    opacity: 0;
+    transition: opacity 700ms ease-out;
 }
 .item-exit-active {
-  opacity: 0;
-  transition: opacity 700ms ease-out;
+    opacity: 0;
+    transition: opacity 700ms ease-out;
 }
